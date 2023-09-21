@@ -1,5 +1,42 @@
 import { Prisma } from "@prisma/client"
 
+export type ApiFull = Prisma.ApiGetPayload<{
+    include: {
+        authModel: true,
+        user: true,
+        endpoints: {
+            include: {
+                returnType: {
+                    include: {
+                        properties: true
+                    }
+                }
+            }
+        },
+        usage: true
+    }
+}>
+
+export type ApiWithAuth = Prisma.ApiGetPayload<{
+    include: {
+        authModel: true
+    }
+}>
+export type ApiWithAuthAndUser = Prisma.ApiGetPayload<{
+    include: {
+        authModel: true,
+        user: true
+    }
+}>
+
+export type ApiWithAuthAndUserAndUsage = Prisma.ApiGetPayload<{
+    include: {
+        authModel: true,
+        user: true,
+        usage: true
+    }
+}>
+
 export type ApiWithRelations = Prisma.ApiGetPayload<{
     include: {
         endpoints: {
@@ -44,3 +81,6 @@ export type ApiSuccess = {
 }
 
 export type ApiResponse = ApiSuccess | ApiError;
+
+
+export type NewApiUsageRecord = { apiNickname: string; endpointPath: string; method: string; statusCode: number; responseTime: number; dataLength: number; ipAddress?: string; }

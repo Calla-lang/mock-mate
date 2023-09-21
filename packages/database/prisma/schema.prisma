@@ -10,25 +10,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
+model SubscriptionLevel {
+  levelName         String  @id
+  requestsPerSecond Int     @default(5)
+  apis              Int     @default(1)
+  endpoints         Int     @default(3)
+  returnTypes       Int     @default(3)
+  typeGeneration    Boolean @default(false)
+  authTypes         Boolean @default(false)
+}
 
-  apis        Api[]
-  returnTypes ReturnType[]
-  AuthModel   AuthModel[]
+model User {
+  id           Int          @id @default(autoincrement())
+  username     String       @unique
+  password     String
+  subscription String       @default("FREE") // should be one of ['FREE', 'BASIC', 'PREMIUM', 'ENTERPRISE']
+  apis         Api[]
+  returnTypes  ReturnType[]
+  authModel    AuthModel[]
 }
 
 model AuthModel {
-  id     Int   @id @default(autoincrement())
-  type String @default("jwt")
-  primaryKey String @default("username")
+  id           Int    @id @default(autoincrement())
+  type         String @default("jwt")
+  primaryKey   String @default("username")
   primaryValue String @default("admin")
-  password String @default("$2b$10$1MzcSVXa0c6EYMPVc7RHNOxmUewHWGMeEFiO5CC5aX7ycZQeX0mn.")
-  
+  password     String @default("$2b$10$1MzcSVXa0c6EYMPVc7RHNOxmUewHWGMeEFiO5CC5aX7ycZQeX0mn.")
+
   apis   Api[]
   user   User  @relation(fields: [userId], references: [id])
   userId Int
+
+  @@unique([userId, type, primaryValue])
+  @@index([userId, type, primaryValue])
 }
 
 model Api {
@@ -42,6 +56,7 @@ model Api {
 
   authModel   AuthModel? @relation(fields: [authModelId], references: [id])
   authModelId Int?
+  usage       ApiUsage[]
 
   @@unique([userId, nickname])
   @@index([nickname])
@@ -61,7 +76,6 @@ model ReturnProperty {
   returnType   ReturnType? @relation(fields: [returnTypeId], references: [id])
   returnTypeId Int?
 
-  @@unique([name, type])
   @@unique([name, returnTypeId])
 }
 
@@ -87,8 +101,32 @@ model Endpoint {
   returnType   ReturnType @relation(fields: [returnTypeId], references: [id])
   returnTypeId Int
 
-  api   Api @relation(fields: [apiId], references: [id])
+  api   Api        @relation(fields: [apiId], references: [id])
   apiId Int
+  usage ApiUsage[]
 
   @@unique([apiId, path])
+}
+
+model ApiUsage {
+  id           Int      @id @default(autoincrement())
+  method       String // The HTTP method (GET, POST, PUT, DELETE, etc.)
+  timestamp    DateTime @default(now()) // When the request was made
+  statusCode   Int // The HTTP status code returned
+  responseTime Int // Time taken to process the request (in milliseconds)
+  dataLength   Int // The length of the data returned (in bytes)
+  ipAddress    String? // IP address of the client making the request
+
+  // Relations
+  api      Api      @relation(fields: [apiId], references: [id])
+  endpoint Endpoint @relation(fields: [endpointId], references: [id])
+
+  apiId      Int
+  endpointId Int
+
+  @@index([apiId])
+  @@index([endpointId])
+  @@index([ipAddress])
+  @@index([statusCode])
+  @@index([method])
 }
