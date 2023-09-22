@@ -8,10 +8,13 @@ import multer from 'koa-multer';
 import authRouter from './routers/auth';
 import MockedApi from './routers/mocked';
 import { CreatorService } from './routers/api';
+import cors from '@koa/cors';
+
 
 const start = async () => {
     const app = new Koa();
-
+    
+    app.use(cors());
     app.use(morgan('dev'))
 
     const upload = multer();
@@ -34,7 +37,7 @@ const start = async () => {
 
 start().then((app) => {
 
-    app.listen(3000, () => {
-        console.log('Server is running on http://localhost:3000');
+    app.listen(3001, () => {
+        console.log('Server is running on http://localhost:3001');
     });
 })

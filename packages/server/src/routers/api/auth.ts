@@ -10,7 +10,7 @@ export const addAuthRoutes = (appRouter: Router, database: Database) => {
     router.post<UserFull>('/login', async (ctx: Context) => {
         const body = (ctx.req as any).body
         let isLoggedIn = false;
-
+        console.log(body)
         const authData = {
             primaryKey: 'username',
             primaryValue: body.username,

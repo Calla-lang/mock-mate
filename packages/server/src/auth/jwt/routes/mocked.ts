@@ -25,7 +25,7 @@ export const jwtLogin = async (ctx: Context, body: any, apiName: string, authMod
 
     // Set cookie
     ctx.cookies.set(`mm_${apiName.toLowerCase().replaceAll(" ", "_")}`, token, {
-        httpOnly: true, // Makes the cookie inaccessible to the JavaScript `Document.cookie` API
+        httpOnly: false, // Makes the cookie inaccessible to the JavaScript `Document.cookie` API
         secure: false,  // Set to true if you're using HTTPS
         maxAge: 1000 * 60 * 60 * 24 // Cookie expiration time in milliseconds
     });
